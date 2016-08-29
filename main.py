@@ -3,7 +3,9 @@ import jinja2
 import webapp2
 import hmac
 import validate
-
+from post import Post
+from user import User
+import user
 from google.appengine.ext import db
 
 SECRET ='ilovemyfamily'
@@ -13,19 +15,6 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                autoescape = True)
 
-class User(db.Model):
-    '''A class to create a User database'''
-    username = db.StringProperty(required = True)
-    password = db.StringProperty(required = True)
-    email = db.StringProperty()
-    created = db.DateTimeProperty(auto_now_add = True)
-    
-class Post(db.Model):
-    '''A class used to create a Post database table'''
-    subject = db.StringProperty(required = True)
-    content = db.TextProperty(required = True)
-    created = db.DateTimeProperty(auto_now_add = True)
-    
 def hash_str(s):
     return hmac.new(SECRET, s).hexdigest()
     

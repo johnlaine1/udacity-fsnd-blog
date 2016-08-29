@@ -40,7 +40,7 @@ def check_secure_val(h):
     else:
         return None
 
-class Handler(webapp2.RequestHandler):
+class BaseHandler(webapp2.RequestHandler):
     '''The class creates some generic functions for use in other handlers'''
     def get_user(self, username):
         q = db.Query(User)
@@ -57,11 +57,13 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
         
-class FrontHandler(Handler):
+class FrontHandler(BaseHandler):
     def get(self):
-        self.render('front.html')
+        posts = db.Query(Post)
+        # posts = Post.all()
+        self.render('front.html', posts = posts)
 
-class RegistrationHandler(Handler):
+class RegistrationHandler(BaseHandler):
     def get(self):
         self.render("registration.html", errors={})
         
@@ -96,13 +98,13 @@ class RegistrationHandler(Handler):
         self.render("registration.html", username=username, 
                                          email=email, errors=errors)            
 
-class WelcomeHandler(Handler):
+class WelcomeHandler(BaseHandler):
     def get(self):
         username = self.request.cookies.get('username')
         username = check_secure_val(username)
         self.render('welcome.html', username = username)
 
-class LoginHandler(Handler):
+class LoginHandler(BaseHandler):
     def get(self):
         self.render('login.html')
         
@@ -122,12 +124,12 @@ class LoginHandler(Handler):
         
         self.render('login.html', error="Invalid Login")
 
-class LogoutHandler(Handler):
+class LogoutHandler(BaseHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', 'username=; Path=/')
         self.redirect('/signup')
     
-class CreatePostHandler(Handler):
+class CreatePostHandler(BaseHandler):
     '''Creates the content on the Add Post page'''
     
     def render_page(self, subject = '', content = '', message = ''):
@@ -149,7 +151,7 @@ class CreatePostHandler(Handler):
             message = "Please enter a subject and some content."
             self.render_page(subject, content, message)
     
-class ViewPostHandler(Handler):
+class ViewPostHandler(BaseHandler):
     def get(self, post_id=''):
         post = Post.get_by_id(int(post_id))
         self.render("view-post.html", post=post)

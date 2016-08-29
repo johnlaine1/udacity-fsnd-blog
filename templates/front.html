@@ -5,7 +5,25 @@
 <div class="jumbotron text-center">
     <h1>Front Page</h1>
 </div>
-<a href="/login" class="login-button btn btn-primary">Login</a>
+<a href="/login" class="login-button login-button btn btn-primary">Login</a>
+
+{% if posts %}
+    {% for post in posts %}
+        <div class="panel panel-primary">
+            <div class="post-subject panel-heading">
+               <a href="post/{{ post.key().id() }}" class="subject-link">{{ post.subject }}</a>
+            </div>
+            <div class="panel-body">
+                <div class="post-created">
+                    <p><strong>Created on: </strong>{{ post.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
+                </div>
+                <div class="post-content">
+                    {{ post.content }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
 
 {% if posts %}
     {% for post in posts %}

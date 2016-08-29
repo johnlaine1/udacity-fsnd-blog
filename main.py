@@ -60,7 +60,6 @@ class BaseHandler(webapp2.RequestHandler):
 class FrontHandler(BaseHandler):
     def get(self):
         posts = db.Query(Post)
-        # posts = Post.all()
         self.render('front.html', posts = posts)
 
 class RegistrationHandler(BaseHandler):

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="jumbotron text-center">
+   <h2>{{ post.subject }}</h2>
+</div>
+
+<div class="post-created">
+    <p><strong>Created on: </strong>{{ post.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
+</div>
+<div class="post-content">
+    {{ post.content }}
+</div>
+
+
+{% endblock %}

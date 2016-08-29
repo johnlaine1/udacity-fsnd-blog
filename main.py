@@ -126,7 +126,34 @@ class LogoutHandler(Handler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', 'username=; Path=/')
         self.redirect('/signup')
+    
+class CreatePostHandler(Handler):
+    '''Creates the content on the Add Post page'''
+    
+    def render_page(self, subject = '', content = '', message = ''):
+        self.render("create-post.html", subject=subject, content=content,
+                    message=message)
         
+    def get(self):
+        self.render_page()
+        
+    def post(self):
+        subject = self.request.get("subject")
+        content = self.request.get("content")
+        
+        if subject and content:
+            post = Post(subject = subject, content = content)
+            post.put()
+            self.redirect('/post/%s' % str(post.key().id()))
+        else:
+            message = "Please enter a subject and some content."
+            self.render_page(subject, content, message)
+    
+class ViewPostHandler(Handler):
+    def get(self, post_id=''):
+        post = Post.get_by_id(int(post_id))
+        self.render("view-post.html", post=post)
+
 app = webapp2.WSGIApplication([
     ('/', FrontHandler),
     ('/signup', RegistrationHandler),

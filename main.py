@@ -20,6 +20,12 @@ class User(db.Model):
     email = db.StringProperty()
     created = db.DateTimeProperty(auto_now_add = True)
     
+class Post(db.Model):
+    '''A class used to create a Post database table'''
+    subject = db.StringProperty(required = True)
+    content = db.TextProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+    
 def hash_str(s):
     return hmac.new(SECRET, s).hexdigest()
     
@@ -126,5 +132,7 @@ app = webapp2.WSGIApplication([
     ('/signup', RegistrationHandler),
     ('/login', LoginHandler),
     ('/logout', LogoutHandler),
-    ('/welcome', WelcomeHandler)
+    ('/welcome', WelcomeHandler),
+    ('/create-post', CreatePostHandler),
+    ('/post/(\d+)', ViewPostHandler)
 ], debug=True)

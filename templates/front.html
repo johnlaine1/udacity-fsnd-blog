@@ -8,21 +8,15 @@
 <a href="/login" class="login-button login-button btn btn-primary">Login</a>
 
 {% if posts %}
+    <div class="list-group">
     {% for post in posts %}
-        <div class="panel panel-primary">
-            <div class="post-subject panel-heading">
-               <a href="post/{{ post.key().id() }}" class="subject-link">{{ post.subject }}</a>
-            </div>
-            <div class="panel-body">
-                <div class="post-created">
-                    <p><strong>Created on: </strong>{{ post.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
-                </div>
-                <div class="post-content">
-                    {{ post.content }}
-                </div>
-            </div>
-        </div>
+        <a href="post/{{ post.key().id() }}" class="list-group-item">
+            <h4 class="list-group-item-heading">{{ post.subject }}</h4>
+            <p class="list-group-item-text post-time"><strong>Created on: </strong>{{ post.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
+            <p class="list-group-item-text post-body">{{ post.content }}</p>
+        </a>
     {% endfor %}
+    </div>
 {% endif %}
 
 {% endblock %}

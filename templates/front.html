@@ -7,9 +7,9 @@
 </div>
 <a href="/login" class="login-button login-button btn btn-primary">Login</a>
 
-{% if posts %}
+{% if data.posts %}
     <div class="list-group">
-    {% for post in posts %}
+    {% for post in data.posts %}
         <a href="post/{{ post.key().id() }}" class="list-group-item">
             <h4 class="list-group-item-heading">{{ post.subject }}</h4>
             <p class="list-group-item-text post-time"><strong>Created on: </strong>{{ post.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>

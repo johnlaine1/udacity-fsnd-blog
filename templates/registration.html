@@ -9,23 +9,23 @@
         <div class="form-group">
             <label for="username">Username</label>
             <input type="text" name="username" id="username" 
-                   class="form=control" value="{{ username }}">
-            <span class="bg-danger"> {{ errors.username_error }} {{ errors.user_exists_error }}</span>
+                   class="form=control" value="{% if data.username %} {{ data.username }} {% endif %}">
+            <span class="bg-danger"> {% if data.errors %} {{ data.errors.username_error }} {{ data.errors.user_exists_error }} {% endif %}</span>
         </div>
         <div class="form-group">
             <label for="password">Password</label>
             <input type="password" name="password" id="password" class="form=control">
-            <span class="bg-danger"> {{ errors.password_error }}</span>
+            <span class="bg-danger"> {% if data.errors %} {{ data.errors.password_error }} {% endif %}</span>
         </div>
         <div class="form-group">
             <label for="verify">Verify Password</label>
             <input type="password" name="verify" id="verify" class="form=control">
-            <span class="bg-danger"> {{ errors.verify_error }}</span>
+            <span class="bg-danger"> {% if data.errors %} {{ data.errors.verify_error }} {% endif %}</span>
         </div>
         <div class="form-group">
             <label for="email">Email(optional)</label>
-            <input type="email" name="email" id="email" class="form=control" value="{{ email }}">
-            <span class="bg-danger"> {{ errors.email_error }}</span>
+            <input type="email" name="email" id="email" class="form=control" value="{{ data.email }}">
+            <span class="bg-danger"> {% if data.errors %} {{ data.errors.email_error }} {% endif %}</span>
         </div>
         <input type="submit">
 </form>

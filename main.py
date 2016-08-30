@@ -15,45 +15,67 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                autoescape = True)
 
-def hash_str(s):
-    return hmac.new(SECRET, s).hexdigest()
-    
-def make_secure_val(s):
-    return '%s|%s' % (s, hash_str(s))
-    
-def check_secure_val(h):
-    val = h.split('|')[0]
-    
-    if h == make_secure_val(val):
-        return val
-    else:
-        return None
 
 class BaseHandler(webapp2.RequestHandler):
-    '''The class creates some generic functions for use in other handlers'''
+    '''The class creates some generic functions for use in other handlers
+    Add all template data to the 'data' dictionary to make it available to 
+    templates
+    '''
+    
+    def __init__(self, request, response):
+        '''This is how we call the base class constructor, see this link:
+        http://stackoverflow.com/questions/15398179/in-python-webapp2-how-put-a-init-in-a-handler-for-get-and-post
+        '''
+        self.initialize(request, response)
+        self.data = {}
+        # If the a user is logged in get thier username, otherwise store None
+        self.data['username'] = self.get_cookie('username')
+        
     def get_user(self, username):
         q = db.Query(User)
         q.filter("username =", username)
         return q.get()
         
-    def write(self, *a, **kw):
-        self.response.out.write(*a, **kw)
-    
-    def render_str(self, template, **params):
-        t = jinja_env.get_template(template)
-        return t.render(params)
+    def get_cookie(self, name):
+        username = self.request.cookies.get(name)
+        if (username):
+            return self.check_secure_val(username)
+        else:
+            return None
         
-    def render(self, template, **kw):
-        self.write(self.render_str(template, **kw))
+    def set_cookie(self, name, value):
+        cookie = self.make_secure_val(value)
+        self.response.headers.add_header(
+            'Set-Cookie', 
+            '%s=%s; Path=/' % (name, str(cookie)))
+    
+    def hash_str(self, s):
+        return hmac.new(SECRET, s).hexdigest()
+        
+    def make_secure_val(self, s):
+        return '%s|%s' % (s, self.hash_str(s))
+    
+    def check_secure_val(self, h):
+        val = h.split('|')[0]
+        
+        if h == self.make_secure_val(val):
+            return val
+        else:
+            return None
+
+    def render(self, template, **kwargs):
+        t = jinja_env.get_template(template)
+        self.response.out.write(t.render(data = self.data))
         
 class FrontHandler(BaseHandler):
     def get(self):
-        posts = db.Query(Post)
-        self.render('front.html', posts = posts)
+        posts = db.Query(Post).order('-created')
+        self.data['posts'] = posts
+        self.render('front.html')
 
 class RegistrationHandler(BaseHandler):
     def get(self):
-        self.render("registration.html", errors={})
+        self.render("registration.html")
         
     def post(self):
         username = self.request.get("username")
@@ -68,29 +90,32 @@ class RegistrationHandler(BaseHandler):
         if not errors:
             if not user_exists:
                 # Hash the password
-                password = hash_str(password)
+                password = self.hash_str(password)
                 # Create the user
                 user = User(username = username, password = password)
-                # Add user to the database
                 user.put()
+                # Add the user to the global data property
+                self.data['user'] = user
                 # Hash the cookie
-                cookie = make_secure_val(username)
-                # Send the cookie
+                cookie = self.make_secure_val(username)
+                # Set the cookie
                 self.response.headers.add_header('Set-Cookie', 'username=%s; Path=/' % str(cookie))
-                # Redirect
+                # Send the user to the welcome screen
                 self.redirect('/welcome')
             else:
                 errors['user_exists_error'] = 'That username already exists'
     
         # Send user back to registration page and show them the errors.
-        self.render("registration.html", username=username, 
-                                         email=email, errors=errors)            
+        self.data.update({'username': username, 'email': email, 'errors': errors})
+        self.render("registration.html")            
 
 class WelcomeHandler(BaseHandler):
     def get(self):
-        username = self.request.cookies.get('username')
-        username = check_secure_val(username)
-        self.render('welcome.html', username = username)
+        self.data['username'] = self.get_cookie('username')
+        if self.data['username']:
+            self.render('welcome.html')
+        else:
+            self.redirect('/signup')
 
 class LoginHandler(BaseHandler):
     def get(self):
@@ -102,15 +127,13 @@ class LoginHandler(BaseHandler):
         user = self.get_user(username)
         
         if user and username and password:
-            if hash_str(password) == user.password:
-                # Hash the cookie
-                cookie = make_secure_val(username)
-                # Send the cookie
-                self.response.headers.add_header('Set-Cookie', 'username=%s; Path=/' % str(cookie))
-                # Redirect
+            if self.hash_str(password) == user.password:
+                self.set_cookie('username', username)
+                self.data['username'] = username
                 self.redirect('/welcome')
         
-        self.render('login.html', error="Invalid Login")
+        self.data['error'] = "Invalid Login"
+        self.render('login.html')
 
 class LogoutHandler(BaseHandler):
     def get(self):
@@ -119,13 +142,8 @@ class LogoutHandler(BaseHandler):
     
 class CreatePostHandler(BaseHandler):
     '''Creates the content on the Add Post page'''
-    
-    def render_page(self, subject = '', content = '', message = ''):
-        self.render("create-post.html", subject=subject, content=content,
-                    message=message)
-        
     def get(self):
-        self.render_page()
+        self.render('create-post.html')
         
     def post(self):
         subject = self.request.get("subject")
@@ -136,13 +154,18 @@ class CreatePostHandler(BaseHandler):
             post.put()
             self.redirect('/post/%s' % str(post.key().id()))
         else:
-            message = "Please enter a subject and some content."
-            self.render_page(subject, content, message)
+            error = "Please enter a subject and some content."
+            self.data.update({
+                'subject': subject, 
+                'content': content,
+                'error': error
+            })
+            self.render('create-post.html')
     
 class ViewPostHandler(BaseHandler):
     def get(self, post_id=''):
-        post = Post.get_by_id(int(post_id))
-        self.render("view-post.html", post=post)
+        self.data['post'] = Post.get_by_id(int(post_id))
+        self.render("view-post.html")
 
 app = webapp2.WSGIApplication([
     ('/', FrontHandler),

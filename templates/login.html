@@ -14,8 +14,8 @@
         <label for="password">Password</label>
         <input type="password" class="form-control" id="password" name="password">
     </div>
-    {% if error %}
-    <span class="bg-danger">{{ error }}</span>
+    {% if data.error %}
+    <span class="bg-danger">{{ data.error }}</span>
     {% endif %}
     <div class="form-group">
         <input type="submit">       

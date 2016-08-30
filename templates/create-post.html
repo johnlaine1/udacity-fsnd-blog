@@ -8,15 +8,15 @@
     <div class="form-group">
         <label for="subject">Subject</label>
         <input type="text" name="subject" id="subject" class="form-control" 
-               value="{{ subject }}">
+               value="{% if data.subject %} {{ data.subject }} {% endif %}">
     </div>
     <div class="form-group">
         <label for="content">Content</label>
-        <textarea id="content" name="content" class="form-control">{{ content }}</textarea>
+        <textarea id="content" name="content" class="form-control">{%if data.content %} {{ data.content }} {% endif %}</textarea>
     </div>
     <div class="form-group">
         <input type="submit" value="Create New Post">
     </div>
 </form>
-<div class="error bg-danger">{{ message }}</div>
+<div class="error bg-danger">{% if data.error %} {{ data.error }} {% endif %}</div>
 {% endblock %}

@@ -161,11 +161,47 @@ class CreatePostHandler(BaseHandler):
                 'error': error
             })
             self.render('create-post.html')
-    
-class ViewPostHandler(BaseHandler):
+
+class ReadPostHandler(BaseHandler):
     def get(self, post_id=''):
         self.data['post'] = Post.get_by_id(int(post_id))
         self.render("view-post.html")
+            
+class UpdatePostHandler(BaseHandler):
+    def get(self, post_id=''):
+        post = Post.get_by_id(int(post_id))
+
+        self.data.update({
+            'update_post': True,
+            'subject': post.subject,
+            'content': post.content
+        })
+        self.render('create-post.html')
+        
+    def post(self, post_id=''):
+        post = Post.get_by_id(int(post_id))
+        subject = self.request.get("subject")
+        content = self.request.get("content")
+        
+        if subject and content:
+            post.subject = subject
+            post.content = content
+            post.put()
+            self.redirect('/post/%s' % str(post.key().id()))
+        else:
+            error = "Please enter a subject and some content."
+            self.data.update({
+                'subject': subject, 
+                'content': content,
+                'error': error
+            })
+            self.render('create-post.html')            
+    
+class DeletePostHandler(BaseHandler):
+    def get(self, post_id=''):
+        post = Post.get_by_id(int(post_id))
+        db.delete(post)
+        self.redirect('/')
 
 app = webapp2.WSGIApplication([
     ('/', FrontHandler),
@@ -173,6 +209,8 @@ app = webapp2.WSGIApplication([
     ('/login', LoginHandler),
     ('/logout', LogoutHandler),
     ('/welcome', WelcomeHandler),
-    ('/create-post', CreatePostHandler),
-    ('/post/(\d+)', ViewPostHandler)
+    ('/post/create', CreatePostHandler),
+    ('/post/delete/(\d+)', DeletePostHandler),
+    ('/post/update/(\d+)', UpdatePostHandler),
+    ('/post/(\d+)', ReadPostHandler)
 ], debug=True)

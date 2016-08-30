@@ -15,7 +15,11 @@
         <textarea id="content" name="content" class="form-control">{%if data.content %} {{ data.content }} {% endif %}</textarea>
     </div>
     <div class="form-group">
+        {% if data.update_post %}
+        <input type="submit" value="Update Post">
+        {% else %}
         <input type="submit" value="Create New Post">
+        {% endif %}
     </div>
 </form>
 <div class="error bg-danger">{% if data.error %} {{ data.error }} {% endif %}</div>

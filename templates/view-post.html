@@ -12,6 +12,8 @@
 <div class="post-content">
     {{ data.post.content }}
 </div>
+<a href="/post/delete/{{ data.post.key().id() }}" class="delete-button btn btn-primary">Delete Post</a>
+<a href="/post/update/{{ data.post.key().id() }}" class="update-button btn btn-primary">Update Post</a>
 
 
 {% endblock %}

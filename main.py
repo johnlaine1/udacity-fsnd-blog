@@ -31,7 +31,9 @@ class BaseHandler(webapp2.RequestHandler):
         self.data = {}
         # If the a user is logged in get thier username, otherwise store None
         username = self.data['username'] = self.get_cookie('username')
-        
+        if (username):
+            self.data['user'] = self.get_user(username)
+            print self.data['user'].key().id()
         # If the user is not logged in and tries to access forbidden pages,
         # redirect to login page.
         # If the user is logged in and tries to access forbidden pages,

@@ -173,7 +173,7 @@ class LogoutHandler(BaseHandler):
         self.response.headers.add_header('Set-Cookie', 'username=; Path=/')
         self.redirect('/signup')
     
-class ReadPostHandler(BaseHandler):
+class ViewPostHandler(BaseHandler):
     def get(self, post_id=''):
         self.tpl_data['post'] = Post.get_by_id(int(post_id))
         self.render("view-post.html")
@@ -248,5 +248,5 @@ app = webapp2.WSGIApplication([
     ('/post/create', CreatePostHandler),
     ('/post/update/(\d+)', CreatePostHandler),
     ('/post/delete/(\d+)', DeletePostHandler),
-    ('/post/(\d+)', ReadPostHandler)
+    ('/post/(\d+)', ViewPostHandler)
 ], debug=True)

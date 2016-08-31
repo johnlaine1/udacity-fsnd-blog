@@ -34,6 +34,7 @@ class BaseHandler(webapp2.RequestHandler):
         username = self.data['username'] = self.get_cookie('username')
         if (username):
             self.current_user = self.get_user(username)
+            self.data['user'] = self.current_user
             
         self.redirect_for_restricted_paths(request)
         
@@ -210,7 +211,6 @@ class CreatePostHandler(BaseHandler):
             else:
                 post = Post(subject = subject, 
                             content = content,
-                            author = self.data['username'],
                             user = self.current_user
                             )
                 post.put()
@@ -227,7 +227,7 @@ class CreatePostHandler(BaseHandler):
 class DeletePostHandler(BaseHandler):
     def get(self, post_id=''):
         post = Post.get_by_id(int(post_id))
-        if not(post.author == self.data['username']):
+        if not(post.user.username == self.current_user.username):
             self.redirect('/post/%s' % post_id)
         else:
             db.delete(post)

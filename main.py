@@ -34,10 +34,15 @@ class BaseHandler(webapp2.RequestHandler):
         if (username):
             self.data['user'] = self.get_user(username)
             print self.data['user'].key().id()
-        # If the user is not logged in and tries to access forbidden pages,
-        # redirect to login page.
-        # If the user is logged in and tries to access forbidden pages,
-        # redirect to front page.
+
+        self.redirect_for_restricted_paths(username, request)
+        
+    def redirect_for_restricted_paths(self, username, request):
+        '''If the user is not logged in and tries to access forbidden pages,
+        redirect to login page.
+        If the user is logged in and tries to access forbidden pages,
+        redirect to front page.
+        '''
         restricted_non_user_paths = [
             '/post/create', 
             '/post/update', 
@@ -56,8 +61,7 @@ class BaseHandler(webapp2.RequestHandler):
             for path in restricted_user_paths:
                 if path in request.url:
                     self.redirect('/')
-        
-        
+    
     def get_user(self, username):
         q = db.Query(User)
         q.filter("username =", username)

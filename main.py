@@ -29,15 +29,15 @@ class BaseHandler(webapp2.RequestHandler):
         '''
         self.initialize(request, response)
         self.data = {}
-        self.user = None
+        self.current_user = None
         # If the user is logged in get thier username, otherwise store None
         username = self.data['username'] = self.get_cookie('username')
         if (username):
-            self.user = self.get_user(username)
+            self.current_user = self.get_user(username)
             
-        self.redirect_for_restricted_paths(username, request)
+        self.redirect_for_restricted_paths(request)
         
-    def redirect_for_restricted_paths(self, username, request):
+    def redirect_for_restricted_paths(self, request):
         '''If the user is not logged in and tries to access forbidden pages,
         redirect to login page.
         If the user is logged in and tries to access forbidden pages,
@@ -53,11 +53,11 @@ class BaseHandler(webapp2.RequestHandler):
             
         restricted_user_paths = ['/login', '/signup']
         
-        if not(username):
+        if not(self.current_user):
             for path in restricted_non_user_paths:
                 if path in request.url:
                     self.redirect('/login')
-        elif (username):
+        elif (self.current_user):
             for path in restricted_user_paths:
                 if path in request.url:
                     self.redirect('/')
@@ -148,7 +148,7 @@ class WelcomeHandler(BaseHandler):
 
 class LoginHandler(BaseHandler):
     def get(self):
-        if not(self.user):
+        if not(self.current_user):
             self.render('login.html')
         else:
             self.redirect('/')
@@ -185,7 +185,7 @@ class CreatePostHandler(BaseHandler):
             post = Post.get_by_id(int(post_id))
             
             # If the user is not the author, do not let them edit the post.
-            if not(post.author == self.data['username']):
+            if not(post.user.username == self.current_user.username):
                 self.redirect('/post/%s' % post_id)
             else:
                 self.data.update({
@@ -210,7 +210,8 @@ class CreatePostHandler(BaseHandler):
             else:
                 post = Post(subject = subject, 
                             content = content,
-                            author = self.data['username']
+                            author = self.data['username'],
+                            user = self.current_user
                             )
                 post.put()
             self.redirect('/post/%s' % str(post.key().id()))

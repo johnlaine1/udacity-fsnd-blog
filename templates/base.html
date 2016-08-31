@@ -12,8 +12,12 @@
             <nav class="navbar navbar-inverse navbar-fixed-top">
               <div class="container-fluid">
                 <ul class="nav navbar-nav navbar-left">
-                  <li><a class="navbar-brand" href="/">DB</a></li>
-                  <li><a class="add-post navbar-brand navbar-right" href="/post/create">Create New Post</a></li>
+                  <li><a class="navbar-brand" href="/">Front</a></li>
+                  {% if data.username %}
+                  <li><a class="add-post" href="/post/create">Create New Post</a></li>
+                  {% else %}
+                  <li><a class="add-post" href="/login">Login or Register To Create A New Post</a></li>
+                  {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                   {% if data.username %}

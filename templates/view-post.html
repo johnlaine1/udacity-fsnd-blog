@@ -8,12 +8,14 @@
 
 <div class="post-created">
     <p><strong>Created on: </strong>{{ data.post.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
+    <p><strong>Created by: </strong>{{ data.post.author }}</p>
 </div>
-<div class="post-content">
+<div class="post-content well well-lg">
     {{ data.post.content }}
 </div>
+{% if data.username == data.post.author %}
 <a href="/post/delete/{{ data.post.key().id() }}" class="delete-button btn btn-primary">Delete Post</a>
 <a href="/post/update/{{ data.post.key().id() }}" class="update-button btn btn-primary">Update Post</a>
-
+{% endif %}
 
 {% endblock %}

@@ -111,8 +111,9 @@ class RegistrationHandler(BaseHandler):
 
 class WelcomeHandler(BaseHandler):
     def get(self):
-        self.data['username'] = self.get_cookie('username')
         if self.data['username']:
+            posts = db.Query(Post).order('-created')
+            self.data['posts'] = posts
             self.render('welcome.html')
         else:
             self.redirect('/signup')
@@ -151,11 +152,17 @@ class CreatePostHandler(BaseHandler):
         # can then get the post data and populate the form.
         if post_id:
             post = Post.get_by_id(int(post_id))
-            self.data.update({
-                'update_post': True,
-                'subject': post.subject,
-                'content': post.content
-            })
+            
+            # If the user is not the author, do not let them edit the post.
+            if not(post.author == self.data['username']):
+                self.redirect('/post/%s' % post_id)
+            else:
+                self.data.update({
+                    'update_post': True,
+                    'subject': post.subject,
+                    'content': post.content,
+                    'author': post.author
+                })
             
         self.render('create-post.html')
         
@@ -164,13 +171,18 @@ class CreatePostHandler(BaseHandler):
         content = self.request.get("content")
         
         if subject and content:
+            # If this is an update, the post_id will be present
             if post_id:
                 post = Post.get_by_id(int(post_id))
                 post.subject = subject
                 post.content = content
                 post.put()
+            # If this is a new post
             else:
-                post = Post(subject = subject, content = content)
+                post = Post(subject = subject, 
+                            content = content,
+                            author = self.data['username']
+                            )
                 post.put()
             self.redirect('/post/%s' % str(post.key().id()))
         else:
@@ -185,8 +197,11 @@ class CreatePostHandler(BaseHandler):
 class DeletePostHandler(BaseHandler):
     def get(self, post_id=''):
         post = Post.get_by_id(int(post_id))
-        db.delete(post)
-        self.redirect('/')
+        if not(post.author == self.data['username']):
+            self.redirect('/post/%s' % post_id)
+        else:
+            db.delete(post)
+            self.redirect('/')
 
 app = webapp2.WSGIApplication([
     ('/', FrontHandler),

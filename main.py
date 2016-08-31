@@ -29,12 +29,12 @@ class BaseHandler(webapp2.RequestHandler):
         '''
         self.initialize(request, response)
         self.data = {}
-        # If the a user is logged in get thier username, otherwise store None
+        self.user = None
+        # If the user is logged in get thier username, otherwise store None
         username = self.data['username'] = self.get_cookie('username')
         if (username):
-            self.data['user'] = self.get_user(username)
-            print self.data['user'].key().id()
-
+            self.user = self.get_user(username)
+            
         self.redirect_for_restricted_paths(username, request)
         
     def redirect_for_restricted_paths(self, username, request):
@@ -148,7 +148,7 @@ class WelcomeHandler(BaseHandler):
 
 class LoginHandler(BaseHandler):
     def get(self):
-        if not(self.data['username']):
+        if not(self.user):
             self.render('login.html')
         else:
             self.redirect('/')

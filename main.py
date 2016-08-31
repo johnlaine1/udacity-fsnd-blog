@@ -3,6 +3,7 @@ import jinja2
 import webapp2
 import hmac
 import validate
+import time
 from post import Post
 from user import User
 import user
@@ -29,7 +30,31 @@ class BaseHandler(webapp2.RequestHandler):
         self.initialize(request, response)
         self.data = {}
         # If the a user is logged in get thier username, otherwise store None
-        self.data['username'] = self.get_cookie('username')
+        username = self.data['username'] = self.get_cookie('username')
+        
+        # If the user is not logged in and tries to access forbidden pages,
+        # redirect to login page.
+        # If the user is logged in and tries to access forbidden pages,
+        # redirect to front page.
+        restricted_non_user_paths = [
+            '/post/create', 
+            '/post/update', 
+            '/post/delete', 
+            '/welcome',
+            '/logout'
+        ]
+            
+        restricted_user_paths = ['/login', '/signup']
+        
+        if not(username):
+            for path in restricted_non_user_paths:
+                if path in request.url:
+                    self.redirect('/login')
+        elif (username):
+            for path in restricted_user_paths:
+                if path in request.url:
+                    self.redirect('/')
+        
         
     def get_user(self, username):
         q = db.Query(User)
@@ -111,17 +136,17 @@ class RegistrationHandler(BaseHandler):
 
 class WelcomeHandler(BaseHandler):
     def get(self):
-        if self.data['username']:
             posts = db.Query(Post).order('-created')
             self.data['posts'] = posts
             self.render('welcome.html')
-        else:
-            self.redirect('/signup')
 
 class LoginHandler(BaseHandler):
     def get(self):
-        self.render('login.html')
-        
+        if not(self.data['username']):
+            self.render('login.html')
+        else:
+            self.redirect('/')
+            
     def post(self):
         username = self.request.get('username')
         password = self.request.get('password')
@@ -159,9 +184,7 @@ class CreatePostHandler(BaseHandler):
             else:
                 self.data.update({
                     'update_post': True,
-                    'subject': post.subject,
-                    'content': post.content,
-                    'author': post.author
+                    'post': post
                 })
             
         self.render('create-post.html')
@@ -201,6 +224,12 @@ class DeletePostHandler(BaseHandler):
             self.redirect('/post/%s' % post_id)
         else:
             db.delete(post)
+            # This is a hack, but the only way I could figure out how to solve
+            # the problem. After post is deleted, user is redirected to '/' and
+            # the deleted post still shows up. If you refresh the page the post
+            # is gone. It's like the page is rendered before the database has
+            # a chance to purge the post.
+            time.sleep(0.1)
             self.redirect('/')
 
 app = webapp2.WSGIApplication([

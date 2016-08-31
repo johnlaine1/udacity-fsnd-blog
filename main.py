@@ -140,53 +140,38 @@ class LogoutHandler(BaseHandler):
         self.response.headers.add_header('Set-Cookie', 'username=; Path=/')
         self.redirect('/signup')
     
-class CreatePostHandler(BaseHandler):
-    '''Creates the content on the Add Post page'''
-    def get(self):
-        self.render('create-post.html')
-        
-    def post(self):
-        subject = self.request.get("subject")
-        content = self.request.get("content")
-        
-        if subject and content:
-            post = Post(subject = subject, content = content)
-            post.put()
-            self.redirect('/post/%s' % str(post.key().id()))
-        else:
-            error = "Please enter a subject and some content."
-            self.data.update({
-                'subject': subject, 
-                'content': content,
-                'error': error
-            })
-            self.render('create-post.html')
-
 class ReadPostHandler(BaseHandler):
     def get(self, post_id=''):
         self.data['post'] = Post.get_by_id(int(post_id))
         self.render("view-post.html")
             
-class UpdatePostHandler(BaseHandler):
+class CreatePostHandler(BaseHandler):
     def get(self, post_id=''):
-        post = Post.get_by_id(int(post_id))
-
-        self.data.update({
-            'update_post': True,
-            'subject': post.subject,
-            'content': post.content
-        })
+        # If this is the 'update' form a post_id will be passed in. We
+        # can then get the post data and populate the form.
+        if post_id:
+            post = Post.get_by_id(int(post_id))
+            self.data.update({
+                'update_post': True,
+                'subject': post.subject,
+                'content': post.content
+            })
+            
         self.render('create-post.html')
         
     def post(self, post_id=''):
-        post = Post.get_by_id(int(post_id))
         subject = self.request.get("subject")
         content = self.request.get("content")
         
         if subject and content:
-            post.subject = subject
-            post.content = content
-            post.put()
+            if post_id:
+                post = Post.get_by_id(int(post_id))
+                post.subject = subject
+                post.content = content
+                post.put()
+            else:
+                post = Post(subject = subject, content = content)
+                post.put()
             self.redirect('/post/%s' % str(post.key().id()))
         else:
             error = "Please enter a subject and some content."
@@ -210,7 +195,7 @@ app = webapp2.WSGIApplication([
     ('/logout', LogoutHandler),
     ('/welcome', WelcomeHandler),
     ('/post/create', CreatePostHandler),
+    ('/post/update/(\d+)', CreatePostHandler),
     ('/post/delete/(\d+)', DeletePostHandler),
-    ('/post/update/(\d+)', UpdatePostHandler),
     ('/post/(\d+)', ReadPostHandler)
 ], debug=True)

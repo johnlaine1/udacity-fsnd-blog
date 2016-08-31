@@ -28,13 +28,13 @@ class BaseHandler(webapp2.RequestHandler):
         http://stackoverflow.com/questions/15398179/in-python-webapp2-how-put-a-init-in-a-handler-for-get-and-post
         '''
         self.initialize(request, response)
-        self.data = {}
+        self.tpl_data = {}
         self.current_user = None
         # If the user is logged in get thier username, otherwise store None
-        username = self.data['username'] = self.get_cookie('username')
+        username = self.tpl_data['username'] = self.get_cookie('username')
         if (username):
             self.current_user = self.get_user(username)
-            self.data['user'] = self.current_user
+            self.tpl_data['user'] = self.current_user
             
         self.redirect_for_restricted_paths(request)
         
@@ -97,12 +97,12 @@ class BaseHandler(webapp2.RequestHandler):
 
     def render(self, template, **kwargs):
         t = jinja_env.get_template(template)
-        self.response.out.write(t.render(data = self.data))
+        self.response.out.write(t.render(data = self.tpl_data))
         
 class FrontHandler(BaseHandler):
     def get(self):
         posts = db.Query(Post).order('-created')
-        self.data['posts'] = posts
+        self.tpl_data['posts'] = posts
         self.render('front.html')
 
 class RegistrationHandler(BaseHandler):
@@ -127,7 +127,7 @@ class RegistrationHandler(BaseHandler):
                 user = User(username = username, password = password)
                 user.put()
                 # Add the user to the global data property
-                self.data['user'] = user
+                self.tpl_data['user'] = user
                 # Hash the cookie
                 cookie = self.make_secure_val(username)
                 # Set the cookie
@@ -138,13 +138,13 @@ class RegistrationHandler(BaseHandler):
                 errors['user_exists_error'] = 'That username already exists'
     
         # Send user back to registration page and show them the errors.
-        self.data.update({'username': username, 'email': email, 'errors': errors})
+        self.tpl_data.update({'username': username, 'email': email, 'errors': errors})
         self.render("registration.html")            
 
 class WelcomeHandler(BaseHandler):
     def get(self):
             posts = db.Query(Post).order('-created')
-            self.data['posts'] = posts
+            self.tpl_data['posts'] = posts
             self.render('welcome.html')
 
 class LoginHandler(BaseHandler):
@@ -162,10 +162,10 @@ class LoginHandler(BaseHandler):
         if user and username and password:
             if self.hash_str(password) == user.password:
                 self.set_cookie('username', username)
-                self.data['username'] = username
+                self.tpl_data['username'] = username
                 self.redirect('/welcome')
         
-        self.data['error'] = "Invalid Login"
+        self.tpl_data['error'] = "Invalid Login"
         self.render('login.html')
 
 class LogoutHandler(BaseHandler):
@@ -175,7 +175,7 @@ class LogoutHandler(BaseHandler):
     
 class ReadPostHandler(BaseHandler):
     def get(self, post_id=''):
-        self.data['post'] = Post.get_by_id(int(post_id))
+        self.tpl_data['post'] = Post.get_by_id(int(post_id))
         self.render("view-post.html")
             
 class CreatePostHandler(BaseHandler):
@@ -189,7 +189,7 @@ class CreatePostHandler(BaseHandler):
             if not(post.user.username == self.current_user.username):
                 self.redirect('/post/%s' % post_id)
             else:
-                self.data.update({
+                self.tpl_data.update({
                     'update_post': True,
                     'post': post
                 })
@@ -217,7 +217,7 @@ class CreatePostHandler(BaseHandler):
             self.redirect('/post/%s' % str(post.key().id()))
         else:
             error = "Please enter a subject and some content."
-            self.data.update({
+            self.tpl_data.update({
                 'subject': subject, 
                 'content': content,
                 'error': error

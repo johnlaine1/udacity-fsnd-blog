@@ -1,11 +1,9 @@
 from google.appengine.ext import db
 from user import User
-from comment import Comment
 
-class Post(db.Model):
-    '''A class used to create a Post database table'''
+class Comment(db.Model):
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
     user = db.ReferenceProperty(User)
-    comments = db.ListProperty(db.Key)
+    post_id = db.StringProperty()
     created = db.DateTimeProperty(auto_now_add = True)

@@ -6,6 +6,7 @@ import validate
 import time
 from post import Post
 from user import User
+from comment import Comment
 import user
 from google.appengine.ext import db
 
@@ -49,7 +50,10 @@ class BaseHandler(webapp2.RequestHandler):
             '/post/update', 
             '/post/delete', 
             '/welcome',
-            '/logout'
+            '/logout',
+            '/comment/create',
+            '/comment/update',
+            '/comment/delete'
         ]
             
         restricted_user_paths = ['/login', '/signup']
@@ -174,8 +178,12 @@ class LogoutHandler(BaseHandler):
     
 class ViewPostHandler(BaseHandler):
     def get(self, post_id=''):
-        self.tpl_data['post'] = Post.get_by_id(int(post_id))
-        self.render("view-post.html")
+        post = Post.get_by_id(int(post_id))
+        comments = db.get(post.comments)
+        comments.reverse()
+        self.tpl_data['post'] = post
+        self.tpl_data['comments'] = comments
+        self.render("post-view.html")
             
 class CreatePostHandler(BaseHandler):
     def get(self, post_id=''):
@@ -238,6 +246,43 @@ class DeletePostHandler(BaseHandler):
             time.sleep(0.1)
             self.redirect('/')
 
+class CreateCommentHandler(BaseHandler):
+    def get(self, post_id = '', comment_id = ''):
+        self.render('create-comment.html')
+        
+    def post(self, post_id = '', comment_id = ''):
+        post = Post.get_by_id(int(post_id))
+        subject = self.request.get("subject")
+        content = self.request.get("content")
+        
+        # Check if we have all the data we need from the user
+        if subject and content:
+            comment = Comment(subject = subject, 
+                              content = content,
+                              user = self.current_user,
+                              post_id = post_id
+                              )
+
+            comment.put()
+            # post.comments is a list, append our new comment key to it.
+            post.comments.append(comment.key())
+            
+            post.put()
+            
+        self.redirect('/post/%s' % str(post.key().id()))
+
+class DeleteCommentHandler(BaseHandler):
+    #TODO Delete the comment
+    #TODO Remove the reference from the related post
+    #TODO Redirect user back to the related post
+    pass
+
+class ViewCommentHandler(BaseHandler):
+    def get(self, comment_id = ''):
+        comment = Comment.get_by_id(int(comment_id))
+        self.tpl_data['comment'] = comment
+        self.render('comment-view.html')
+
 app = webapp2.WSGIApplication([
     ('/', FrontHandler),
     ('/signup', RegistrationHandler),
@@ -247,5 +292,9 @@ app = webapp2.WSGIApplication([
     ('/post/create', CreatePostHandler),
     ('/post/update/(\d+)', CreatePostHandler),
     ('/post/delete/(\d+)', DeletePostHandler),
-    ('/post/(\d+)', ViewPostHandler)
+    ('/post/(\d+)', ViewPostHandler),
+    ('/post/(\d+)/comment/create', CreateCommentHandler),
+    ('/comment/update/(\d+)', CreateCommentHandler),
+    ('/comment/delete/(\d+)', DeleteCommentHandler),
+    ('/comment/(\d+)', ViewCommentHandler)
 ], debug=True)

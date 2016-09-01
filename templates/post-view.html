@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="jumbotron text-center">
+   <h2>{{ data.post.subject }}</h2>
+</div>
+
+<div class="post-created">
+    <p><strong>Created on: </strong>{{ data.post.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
+    <p><strong>Created by: </strong>{{ data.post.user.username }}</p>
+</div>
+<div class="post-content">
+    {{ data.post.content }}
+    
+<!--Buttons to update or delete posts-->
+</div>
+{% if data.user %}
+    {% if data.user.username == data.post.user.username %}
+    <a href="/post/delete/{{ data.post.key().id() }}" class="delete-button btn btn-danger">Delete Post</a>
+    <a href="/post/update/{{ data.post.key().id() }}" class="update-button btn btn-primary">Update Post</a>
+    {% endif %}
+{% endif %}
+
+<div class="comments">
+    <h2>Comments</h2>
+    {% if data.comments %}
+        <div class="col-md-6 list-group">    
+        {% for comment in data.comments %}
+            <a href="/comment/{{ comment.key().id() }}" class="list-group-item">
+                <p><strong>Created on: </strong>{{ comment.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
+                <p><strong>Created by: </strong>{{ comment.user.username }}</p>
+                <p><strong>Title: </strong>{{ comment.subject }}</p>
+                <p><strong>Content: </strong>{{ comment.content }}</p>  
+                <p><strong>Post id: </strong>{{ comment.post_id }}</p>
+            </a>
+        {% endfor %}
+        </div>
+    {% else %}
+        <h3>There are no comments yet, be the first to comment!</h3>
+    {% endif %}
+</div>
+
+{% endblock %}

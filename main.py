@@ -31,7 +31,7 @@ class BaseHandler(webapp2.RequestHandler):
         self.tpl_data = {}
         self.current_user = None
         # If the user is logged in get thier username, otherwise store None
-        username = self.tpl_data['username'] = self.get_cookie('username')
+        username = self.get_cookie('username')
         if (username):
             self.current_user = self.get_user(username)
             self.tpl_data['user'] = self.current_user
@@ -162,7 +162,6 @@ class LoginHandler(BaseHandler):
         if user and username and password:
             if self.hash_str(password) == user.password:
                 self.set_cookie('username', username)
-                self.tpl_data['username'] = username
                 self.redirect('/welcome')
         
         self.tpl_data['error'] = "Invalid Login"

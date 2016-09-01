@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="jumbotron text-center">
-    <h1>Welcome, {{ data.username }} !</h1>
+    <h1>Welcome, {{ data.user.username | capitalize }} !</h1>
 </div>
 
 {% if data.posts %}

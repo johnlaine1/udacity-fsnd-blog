@@ -20,7 +20,7 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 class BaseHandler(webapp2.RequestHandler):
     '''The class creates some generic functions for use in other handlers
     Add all template data to the 'data' dictionary to make it available to 
-    templates
+    templates.
     '''
     
     def __init__(self, request, response):
@@ -170,7 +170,7 @@ class LoginHandler(BaseHandler):
 class LogoutHandler(BaseHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', 'username=; Path=/')
-        self.redirect('/signup')
+        self.redirect('/login')
     
 class ViewPostHandler(BaseHandler):
     def get(self, post_id=''):

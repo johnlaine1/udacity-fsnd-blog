@@ -200,7 +200,7 @@ class CreatePostHandler(BaseHandler):
                     'update_post': True,
                     'post': post
                 })
-        self.render('create-post.html')
+        self.render('post-create.html')
         
     def post(self, post_id=''):
         subject = self.request.get("subject")
@@ -228,7 +228,7 @@ class CreatePostHandler(BaseHandler):
                 'content': content,
                 'error': error
             })
-            self.render('create-post.html')            
+            self.render('post-create.html')            
     
 class DeletePostHandler(BaseHandler):
     def get(self, post_id=''):
@@ -263,7 +263,7 @@ class CreateCommentHandler(BaseHandler):
                     'comment': comment
                 })
                 
-        self.render('create-comment.html')
+        self.render('comment-create.html')
         
     def post(self, post_id = '', comment_id = ''):
         post = Post.get_by_id(int(post_id))
@@ -298,7 +298,8 @@ class CreateCommentHandler(BaseHandler):
                 'content': content,
                 'error': error
             })
-            self.render('create-comment.html')
+            self.render('comment-create.html')
+            
 class DeleteCommentHandler(BaseHandler):
     #TODO Delete the comment
     #TODO Remove the reference from the related post

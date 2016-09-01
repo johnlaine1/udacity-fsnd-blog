@@ -200,7 +200,6 @@ class CreatePostHandler(BaseHandler):
                     'update_post': True,
                     'post': post
                 })
-            
         self.render('create-post.html')
         
     def post(self, post_id=''):
@@ -247,7 +246,23 @@ class DeletePostHandler(BaseHandler):
             self.redirect('/')
 
 class CreateCommentHandler(BaseHandler):
+    '''This handler both creates and updates comments, if comment_id contains
+    a value then we are updating, if not we are creating.
+    '''
     def get(self, post_id = '', comment_id = ''):
+        if comment_id:
+            comment = Comment.get_by_id(int(comment_id))
+            
+            # If the user is not the author do not let them edit comment.
+            if not(comment.user.username == self.current_user.username):
+                self.redirect('/comment/%s' % comment_id)
+            # Otherwise pass the data along to the template
+            else:
+                self.tpl_data.update({
+                    'update_comment': True,
+                    'comment': comment
+                })
+                
         self.render('create-comment.html')
         
     def post(self, post_id = '', comment_id = ''):
@@ -257,20 +272,33 @@ class CreateCommentHandler(BaseHandler):
         
         # Check if we have all the data we need from the user
         if subject and content:
-            comment = Comment(subject = subject, 
-                              content = content,
-                              user = self.current_user,
-                              post_id = post_id
-                              )
-
-            comment.put()
-            # post.comments is a list, append our new comment key to it.
-            post.comments.append(comment.key())
-            
-            post.put()
-            
-        self.redirect('/post/%s' % str(post.key().id()))
-
+            # If this is an update, the comment_id will be present
+            if comment_id:
+                comment = Comment.get_by_id(int(comment_id))
+                comment.subject = subject
+                comment.content = content
+                comment.put()
+            # If this is a new comment, we create the comment then append it
+            # to the comment list on the related post.
+            else:
+                comment = Comment(subject = subject, 
+                                  content = content,
+                                  user = self.current_user,
+                                  post_id = post_id
+                                  )
+                comment.put()
+                # post.comments is a list, append our new comment key to it.
+                post.comments.append(comment.key())
+                post.put()
+            self.redirect('/post/%s' % str(post.key().id()))
+        else:
+            error = "Please enter a subject and some content."
+            self.tpl_data.update({
+                'subject': subject,
+                'content': content,
+                'error': error
+            })
+            self.render('create-comment.html')
 class DeleteCommentHandler(BaseHandler):
     #TODO Delete the comment
     #TODO Remove the reference from the related post
@@ -294,7 +322,7 @@ app = webapp2.WSGIApplication([
     ('/post/delete/(\d+)', DeletePostHandler),
     ('/post/(\d+)', ViewPostHandler),
     ('/post/(\d+)/comment/create', CreateCommentHandler),
-    ('/comment/update/(\d+)', CreateCommentHandler),
+    ('/post/(\d+)/comment/update/(\d+)', CreateCommentHandler),
     ('/comment/delete/(\d+)', DeleteCommentHandler),
     ('/comment/(\d+)', ViewCommentHandler)
 ], debug=True)

@@ -12,9 +12,9 @@
 </div>
 <div class="post-content">
     {{ data.post.content }}
-    
-<!--Buttons to update or delete posts-->
 </div>
+
+<!--Buttons to update or delete posts and add comments-->
 {% if data.user %}
     {% if data.user.username == data.post.user.username %}
     <a href="/post/delete/{{ data.post.key().id() }}" class="delete-button btn btn-danger">Delete Post</a>

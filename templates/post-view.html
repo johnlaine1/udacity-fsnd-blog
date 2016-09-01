@@ -20,6 +20,7 @@
     <a href="/post/delete/{{ data.post.key().id() }}" class="delete-button btn btn-danger">Delete Post</a>
     <a href="/post/update/{{ data.post.key().id() }}" class="update-button btn btn-primary">Update Post</a>
     {% endif %}
+    <a href="/post/{{ data.post.key().id() }}/comment/create" class="create-comment btn btn-success">Add a Comment</a>
 {% endif %}
 
 <div class="comments">
@@ -37,7 +38,7 @@
         {% endfor %}
         </div>
     {% else %}
-        <h3>There are no comments yet, be the first to comment!</h3>
+        <h3>There are no comments yet, be the first to add a <a href="/post/{{ data.post.key().id() }}/comment/create">comment!</a></h3>
     {% endif %}
 </div>
 

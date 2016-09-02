@@ -153,10 +153,7 @@ class WelcomeHandler(BaseHandler):
 
 class LoginHandler(BaseHandler):
     def get(self):
-        if not(self.current_user):
             self.render('login.html')
-        else:
-            self.redirect('/')
             
     def post(self):
         username = self.request.get('username')
@@ -166,8 +163,8 @@ class LoginHandler(BaseHandler):
         if user and username and password:
             if self.hash_str(password) == user.password:
                 self.set_cookie('username', username)
-                self.redirect('/welcome')
-        
+                self.redirect(self.request.referer)
+
         self.tpl_data['error'] = "Invalid Login"
         self.render('login.html')
 
@@ -227,14 +224,19 @@ class PostViewHandler(BaseHandler):
     def get(self, post_id=''):
         post = Post.get_by_id(int(post_id))
         comments = db.get(post.comments)
+        user_likes_post = None
         
         # A boolean to check if the current user has already liked the post
-        user_likes_post = self.current_user.key() in post.likes
+        if self.current_user:
+            user_likes_post = self.current_user.key() in post.likes
         
         comments.reverse()
-        self.tpl_data['post'] = post
-        self.tpl_data['comments'] = comments
-        self.tpl_data['user_likes_post'] = user_likes_post
+        self.tpl_data.update({
+            'post': post,
+            'comments': comments,
+            'user_likes_post': user_likes_post
+        })
+
         self.render("post-view.html")
         
 class PostLikeHandler(BaseHandler):
@@ -250,11 +252,12 @@ class PostLikeHandler(BaseHandler):
             if user_key in post.likes:
                 post.likes.remove(user_key)
                 
-            # If they have NOT like it, we like it by adding their user key.
+            # If they have NOT like it, we like it by adding their user key to
+            # the likes list.
             else:
                 post.likes.append(user_key)
                 
-            # Write to the database
+            # Either way, we need to write to the database.
             post.put()
             
         # Send the user back to the post.

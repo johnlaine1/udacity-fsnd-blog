@@ -233,10 +233,16 @@ class PostViewHandler(BaseHandler):
 class PostDeleteHandler(BaseHandler):
     def get(self, post_id=''):
         post = Post.get_by_id(int(post_id))
+        
+        # If the current user is not the author of the post, redirect to the
+        # post view page.
         if not(post.user.username == self.current_user.username):
             self.redirect('/post/%s' % post_id)
         else:
+            # First we need to delete all the comments related to this post.
+            db.delete(post.comments)
             db.delete(post)
+            
             # This is a hack, but the only way I could figure out how to solve
             # the problem. After post is deleted, user is redirected to '/' and
             # the deleted post still shows up. If you refresh the page the post

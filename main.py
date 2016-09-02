@@ -175,17 +175,8 @@ class LogoutHandler(BaseHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', 'username=; Path=/')
         self.redirect('/login')
-    
-class ViewPostHandler(BaseHandler):
-    def get(self, post_id=''):
-        post = Post.get_by_id(int(post_id))
-        comments = db.get(post.comments)
-        comments.reverse()
-        self.tpl_data['post'] = post
-        self.tpl_data['comments'] = comments
-        self.render("post-view.html")
-            
-class CreatePostHandler(BaseHandler):
+        
+class PostCreateHandler(BaseHandler):
     def get(self, post_id=''):
         # If this is the 'update' form a post_id will be passed in. We
         # can then get the post data and populate the form.
@@ -228,9 +219,18 @@ class CreatePostHandler(BaseHandler):
                 'content': content,
                 'error': error
             })
-            self.render('post-create.html')            
+            self.render('post-create.html')                    
     
-class DeletePostHandler(BaseHandler):
+class PostViewHandler(BaseHandler):
+    def get(self, post_id=''):
+        post = Post.get_by_id(int(post_id))
+        comments = db.get(post.comments)
+        comments.reverse()
+        self.tpl_data['post'] = post
+        self.tpl_data['comments'] = comments
+        self.render("post-view.html")
+    
+class PostDeleteHandler(BaseHandler):
     def get(self, post_id=''):
         post = Post.get_by_id(int(post_id))
         if not(post.user.username == self.current_user.username):
@@ -245,7 +245,7 @@ class DeletePostHandler(BaseHandler):
             time.sleep(0.1)
             self.redirect('/')
 
-class CreateCommentHandler(BaseHandler):
+class CommentCreateHandler(BaseHandler):
     '''This handler both creates and updates comments, if comment_id contains
     a value then we are updating, if not we are creating.
     '''
@@ -302,8 +302,14 @@ class CreateCommentHandler(BaseHandler):
                 'error': error
             })
             self.render('comment-create.html')
-            
-class DeleteCommentHandler(BaseHandler):
+
+class CommentViewHandler(BaseHandler):
+    def get(self, comment_id = ''):
+        comment = Comment.get_by_id(int(comment_id))
+        self.tpl_data['comment'] = comment
+        self.render('comment-view.html')
+
+class CommentDeleteHandler(BaseHandler):
     def get(self, comment_id = ''):
         comment = Comment.get_by_id(int(comment_id))
         post_id = comment.post_id
@@ -334,25 +340,19 @@ class DeleteCommentHandler(BaseHandler):
             
             # Redirect the user back to the related post.
             self.redirect('/post/%s' % post_id)
-
-class ViewCommentHandler(BaseHandler):
-    def get(self, comment_id = ''):
-        comment = Comment.get_by_id(int(comment_id))
-        self.tpl_data['comment'] = comment
-        self.render('comment-view.html')
-
+            
 app = webapp2.WSGIApplication([
     ('/', FrontHandler),
     ('/signup', RegistrationHandler),
     ('/login', LoginHandler),
     ('/logout', LogoutHandler),
     ('/welcome', WelcomeHandler),
-    ('/post/create', CreatePostHandler),
-    ('/post/update/(\d+)', CreatePostHandler),
-    ('/post/delete/(\d+)', DeletePostHandler),
-    ('/post/(\d+)', ViewPostHandler),
-    ('/post/(\d+)/comment/create', CreateCommentHandler),
-    ('/post/(\d+)/comment/update/(\d+)', CreateCommentHandler),
-    ('/comment/delete/(\d+)', DeleteCommentHandler),
-    ('/comment/(\d+)', ViewCommentHandler)
+    ('/post/create', PostCreateHandler),
+    ('/post/update/(\d+)', PostCreateHandler),
+    ('/post/(\d+)', PostViewHandler),    
+    ('/post/delete/(\d+)', PostDeleteHandler),
+    ('/post/(\d+)/comment/create', CommentCreateHandler),
+    ('/post/(\d+)/comment/update/(\d+)', CommentCreateHandler),
+    ('/comment/(\d+)', CommentViewHandler),    
+    ('/comment/delete/(\d+)', CommentDeleteHandler)
 ], debug=True)

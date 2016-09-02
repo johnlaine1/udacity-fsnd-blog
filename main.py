@@ -272,6 +272,7 @@ class CreateCommentHandler(BaseHandler):
         
         # Check if we have all the data we need from the user
         if subject and content:
+            
             # If this is an update, the comment_id will be present
             if comment_id:
                 comment = Comment.get_by_id(int(comment_id))
@@ -279,6 +280,7 @@ class CreateCommentHandler(BaseHandler):
                 comment.content = content
                 comment.put()
                 self.redirect('/comment/%s' % str(comment.key().id()))
+                
             # If this is a new comment, we create the comment then append it
             # to the comment list on the related post.
             else:
@@ -302,10 +304,36 @@ class CreateCommentHandler(BaseHandler):
             self.render('comment-create.html')
             
 class DeleteCommentHandler(BaseHandler):
-    #TODO Delete the comment
-    #TODO Remove the reference from the related post
-    #TODO Redirect user back to the related post
-    pass
+    def get(self, comment_id = ''):
+        comment = Comment.get_by_id(int(comment_id))
+        post_id = comment.post_id
+        
+        # If the current user is not the author of the comment, redirect to
+        # comment view page.
+        if not(comment.user.username == self.current_user.username):
+            
+            # Redirect the user back to the related comment.
+            self.redirect('/comment/%s' % comment_id)
+        else:
+            
+            # Get the post that this comment is attached to and remove the
+            # comment from the comment list.
+            post = Post.get_by_id(int(post_id))
+            post.comments.remove(comment.key())
+            post.put()
+            
+            # Delete the comment.
+            db.delete(comment)
+            
+            # This is a hack, but the only way I could figure out how to solve
+            # the problem. After post is deleted, user is redirected to '/' and
+            # the deleted post still shows up. If you refresh the page the post
+            # is gone. It's like the page is rendered before the database has
+            # a chance to purge the post.
+            time.sleep(0.1)
+            
+            # Redirect the user back to the related post.
+            self.redirect('/post/%s' % post_id)
 
 class ViewCommentHandler(BaseHandler):
     def get(self, comment_id = ''):

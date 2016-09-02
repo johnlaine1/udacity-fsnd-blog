@@ -19,18 +19,22 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 
 
 class BaseHandler(webapp2.RequestHandler):
-    '''The class creates some generic functions for use in other handlers
-    Add all template data to the 'data' dictionary to make it available to 
-    templates.
+    '''This class creates some generic functions and properties for use in 
+    other handlers. Add all template data to the 'data' dictionary to make it 
+    available to templates.
+    
+    Attributes
+        tpl_data: A dictionary of data that will be available to all templates.
+        current_user: The db.key of the currently logged in user.
     '''
     
     def __init__(self, request, response):
-        '''This is how we call the base class constructor, see this link:
-        http://stackoverflow.com/questions/15398179/in-python-webapp2-how-put-a-init-in-a-handler-for-get-and-post
-        '''
+        # This is how we call the base class constructor, see this link:
+        # http://stackoverflow.com/questions/15398179/in-python-webapp2-how-put-a-init-in-a-handler-for-get-and-post
         self.initialize(request, response)
         self.tpl_data = {}
         self.current_user = None
+        
         # If the user is logged in get thier username, otherwise store None
         username = self.get_cookie('username')
         if (username):
@@ -104,12 +108,16 @@ class BaseHandler(webapp2.RequestHandler):
         self.response.out.write(t.render(data = self.tpl_data))
         
 class FrontHandler(BaseHandler):
+    '''The request handler for the main or front page of the site'''
+    
     def get(self):
         posts = db.Query(Post).order('-created')
         self.tpl_data['posts'] = posts
         self.render('front.html')
 
 class RegistrationHandler(BaseHandler):
+    '''The request handler for the registration page'''
+    
     def get(self):
         self.render("registration.html")
         
@@ -146,12 +154,16 @@ class RegistrationHandler(BaseHandler):
         self.render("registration.html")            
 
 class WelcomeHandler(BaseHandler):
+    '''The request handler for the welcome page'''
+    
     def get(self):
             posts = db.Query(Post).order('-created')
             self.tpl_data['posts'] = posts
             self.render('welcome.html')
 
 class LoginHandler(BaseHandler):
+    '''The request handler for the login page'''
+    
     def get(self):
             self.render('login.html')
             
@@ -169,11 +181,19 @@ class LoginHandler(BaseHandler):
         self.render('login.html')
 
 class LogoutHandler(BaseHandler):
+    '''The request handler for the logout page'''
+    
     def get(self):
         self.response.headers.add_header('Set-Cookie', 'username=; Path=/')
         self.redirect('/login')
         
 class PostCreateHandler(BaseHandler):
+    '''The request handler for creating and updating a post
+    
+    This handler both creates and updates posts, if post_id contains
+    a value then we are updating, if not we are creating.
+    '''
+    
     def get(self, post_id=''):
         # If this is the 'update' form a post_id will be passed in. We
         # can then get the post data and populate the form.
@@ -221,6 +241,8 @@ class PostCreateHandler(BaseHandler):
             self.render('post-create.html')                    
     
 class PostViewHandler(BaseHandler):
+    '''The request handler for viewing an individual post'''
+    
     def get(self, post_id=''):
         post = Post.get_by_id(int(post_id))
         comments = db.get(post.comments)
@@ -240,6 +262,8 @@ class PostViewHandler(BaseHandler):
         self.render("post-view.html")
         
 class PostLikeHandler(BaseHandler):
+    '''The request handler for liking or unliking a post'''
+    
     def get(self, post_id = ''):
         post = Post.get_by_id(int(post_id))
         user_key = self.current_user.key()
@@ -264,6 +288,8 @@ class PostLikeHandler(BaseHandler):
         self.redirect('/post/%s' % post_id)
     
 class PostDeleteHandler(BaseHandler):
+    '''The request handler for deleting a post'''
+    
     def get(self, post_id=''):
         post = Post.get_by_id(int(post_id))
         
@@ -285,9 +311,12 @@ class PostDeleteHandler(BaseHandler):
             self.redirect('/')
 
 class CommentCreateHandler(BaseHandler):
-    '''This handler both creates and updates comments, if comment_id contains
+    '''The request handler for creating and updating a comment
+    
+    This handler both creates and updates comments, if comment_id contains
     a value then we are updating, if not we are creating.
     '''
+    
     def get(self, post_id = '', comment_id = ''):
         if comment_id:
             comment = Comment.get_by_id(int(comment_id))
@@ -343,12 +372,20 @@ class CommentCreateHandler(BaseHandler):
             self.render('comment-create.html')
 
 class CommentViewHandler(BaseHandler):
+    '''The request handler for viewing an individual comment'''
+    
     def get(self, comment_id = ''):
         comment = Comment.get_by_id(int(comment_id))
         self.tpl_data['comment'] = comment
         self.render('comment-view.html')
 
 class CommentDeleteHandler(BaseHandler):
+    '''The request handler for deleting a comment
+    
+    The comment itself will be deleted and also the reference within the
+    post that this comment is related to will be deleted.
+    '''
+    
     def get(self, comment_id = ''):
         comment = Comment.get_by_id(int(comment_id))
         post_id = comment.post_id

@@ -198,12 +198,14 @@ class PostCreateHandler(BaseHandler):
         content = self.request.get("content")
         
         if subject and content:
+            
             # If this is an update, the post_id will be present
             if post_id:
                 post = Post.get_by_id(int(post_id))
                 post.subject = subject
                 post.content = content
                 post.put()
+                
             # If this is a new post
             else:
                 post = Post(subject = subject, 
@@ -225,10 +227,38 @@ class PostViewHandler(BaseHandler):
     def get(self, post_id=''):
         post = Post.get_by_id(int(post_id))
         comments = db.get(post.comments)
+        
+        # A boolean to check if the current user has already liked the post
+        user_likes_post = self.current_user.key() in post.likes
+        
         comments.reverse()
         self.tpl_data['post'] = post
         self.tpl_data['comments'] = comments
+        self.tpl_data['user_likes_post'] = user_likes_post
         self.render("post-view.html")
+        
+class PostLikeHandler(BaseHandler):
+    def get(self, post_id = ''):
+        post = Post.get_by_id(int(post_id))
+        user_key = self.current_user.key()
+        
+        # First we make sure that the current user is not the author.
+        if not(post.user.key() == user_key):
+            
+            # Then we check if the current user has already liked this post.
+            # If they have already liked it, we unlike by removing their key.
+            if user_key in post.likes:
+                post.likes.remove(user_key)
+                
+            # If they have NOT like it, we like it by adding their user key.
+            else:
+                post.likes.append(user_key)
+                
+            # Write to the database
+            post.put()
+            
+        # Send the user back to the post.
+        self.redirect('/post/%s' % post_id)
     
 class PostDeleteHandler(BaseHandler):
     def get(self, post_id=''):
@@ -355,7 +385,8 @@ app = webapp2.WSGIApplication([
     ('/welcome', WelcomeHandler),
     ('/post/create', PostCreateHandler),
     ('/post/update/(\d+)', PostCreateHandler),
-    ('/post/(\d+)', PostViewHandler),    
+    ('/post/(\d+)', PostViewHandler),
+    ('/post/like/(\d+)', PostLikeHandler),
     ('/post/delete/(\d+)', PostDeleteHandler),
     ('/post/(\d+)/comment/create', CommentCreateHandler),
     ('/post/(\d+)/comment/update/(\d+)', CommentCreateHandler),

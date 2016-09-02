@@ -9,17 +9,33 @@
 <div class="post-created">
     <p><strong>Created on: </strong>{{ data.post.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
     <p><strong>Created by: </strong>{{ data.post.user.username }}</p>
+    <p><strong>Likes: </strong>{{ data.post.likes|length }}</p>
 </div>
 <div class="post-content">
     {{ data.post.content }}
 </div>
 
-<!--Buttons to update or delete posts and add comments-->
+<!--If the user is logged in show the set of action buttons-->
 {% if data.user %}
+
+    <!--If the logged in user is the author of the post-->
     {% if data.user.username == data.post.user.username %}
-    <a href="/post/delete/{{ data.post.key().id() }}" class="delete-button btn btn-danger">Delete Post</a>
-    <a href="/post/update/{{ data.post.key().id() }}" class="update-button btn btn-primary">Update Post</a>
+        <a href="/post/delete/{{ data.post.key().id() }}" class="delete-button btn btn-danger">Delete Post</a>
+        <a href="/post/update/{{ data.post.key().id() }}" class="update-button btn btn-primary">Update Post</a>
     {% endif %}
+    
+    <!--If the logged in user is NOT the author of the post-->
+    {% if not data.user.username == data.post.user.username %}
+    
+        <!--If the user has already liked this post-->
+        {% if data.user_likes_post %}
+        <a href="/post/like/{{ data.post.key().id() }}" class="delete-button btn btn-danger">Unlike</a>
+        <!--If the user has NOT already liked this post-->
+        {% else %}
+        <a href="/post/like/{{ data.post.key().id() }}" class="delete-button btn btn-danger">like</a>
+        {% endif %}
+    {% endif %}
+    
     <a href="/post/{{ data.post.key().id() }}/comment/create" class="create-comment btn btn-success">Add a Comment</a>
 {% endif %}
 

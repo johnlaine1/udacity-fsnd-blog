@@ -37,9 +37,9 @@ class BaseHandler(webapp2.RequestHandler):
             self.current_user = self.get_user(username)
             self.tpl_data['user'] = self.current_user
             
-        self.redirect_for_restricted_paths(request)
+        self.restricted_path_redirect(request)
         
-    def redirect_for_restricted_paths(self, request):
+    def restricted_path_redirect(self, request):
         '''If the user is not logged in and tries to access forbidden pages,
         redirect to login page.
         If the user is logged in and tries to access forbidden pages,

@@ -195,6 +195,7 @@ class PostCreateHandler(BaseHandler):
     '''
     
     def get(self, post_id=''):
+        
         # If this is the 'update' form a post_id will be passed in. We
         # can then get the post data and populate the form.
         if post_id:
@@ -214,16 +215,18 @@ class PostCreateHandler(BaseHandler):
         subject = self.request.get("subject")
         content = self.request.get("content")
         
+        # Check if all required data has been filled in
         if subject and content:
             
-            # If this is an update, the post_id will be present
+            # If this is an update, the post_id will be present and we update
+            # the existing post.
             if post_id:
                 post = Post.get_by_id(int(post_id))
                 post.subject = subject
                 post.content = content
                 post.put()
                 
-            # If this is a new post
+            # If this is a new post, we create a new post
             else:
                 post = Post(subject = subject, 
                             content = content,
@@ -234,8 +237,7 @@ class PostCreateHandler(BaseHandler):
         else:
             error = "Please enter a subject and some content."
             self.tpl_data.update({
-                'subject': subject, 
-                'content': content,
+                'post': {'subject': subject, 'content': content},
                 'error': error
             })
             self.render('post-create.html')                    
@@ -365,8 +367,7 @@ class CommentCreateHandler(BaseHandler):
         else:
             error = "Please enter a subject and some content."
             self.tpl_data.update({
-                'subject': subject,
-                'content': content,
+                'comment': {'subject': subject, 'content': content},
                 'error': error
             })
             self.render('comment-create.html')

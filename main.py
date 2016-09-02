@@ -278,6 +278,7 @@ class CreateCommentHandler(BaseHandler):
                 comment.subject = subject
                 comment.content = content
                 comment.put()
+                self.redirect('/comment/%s' % str(comment.key().id()))
             # If this is a new comment, we create the comment then append it
             # to the comment list on the related post.
             else:
@@ -290,7 +291,7 @@ class CreateCommentHandler(BaseHandler):
                 # post.comments is a list, append our new comment key to it.
                 post.comments.append(comment.key())
                 post.put()
-            self.redirect('/post/%s' % str(post.key().id()))
+                self.redirect('/post/%s' % str(post.key().id()))
         else:
             error = "Please enter a subject and some content."
             self.tpl_data.update({

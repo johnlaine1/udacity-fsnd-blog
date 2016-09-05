@@ -87,13 +87,13 @@ class BaseHandler(webapp2.RequestHandler):
         cookie = self.make_secure_val(value)
         self.response.headers.add_header(
             'Set-Cookie', 
-            '%s=%s; Path=/' % (name, str(cookie)))
+            '{}={}; Path=/'.format(name, str(cookie)))
     
     def hash_str(self, s):
         return hmac.new(SECRET, s).hexdigest()
         
     def make_secure_val(self, s):
-        return '%s|%s' % (s, self.hash_str(s))
+        return '{}|{}'.format(s, self.hash_str(s))
     
     def check_secure_val(self, h):
         val = h.split('|')[0]
@@ -143,7 +143,7 @@ class RegistrationHandler(BaseHandler):
                 # Hash the cookie
                 cookie = self.make_secure_val(username)
                 # Set the cookie
-                self.response.headers.add_header('Set-Cookie', 'username=%s; Path=/' % str(cookie))
+                self.response.headers.add_header('Set-Cookie', 'username={}; Path=/'.format(str(cookie)))
                 # Send the user to the welcome screen
                 self.redirect('/welcome')
             else:
@@ -203,7 +203,7 @@ class PostCreateHandler(BaseHandler):
             
             # If the user is not the author, do not let them edit the post.
             if not(post.user.username == self.current_user.username):
-                self.redirect('/post/%s' % post_id)
+                self.redirect('/post/{}'.format(post_id))
             else:
                 self.tpl_data.update({
                     'update_post': True,
@@ -233,7 +233,7 @@ class PostCreateHandler(BaseHandler):
                             user = self.current_user
                             )
                 post.put()
-            self.redirect('/post/%s' % str(post.key().id()))
+            self.redirect('/post/{}'.format(str(post.key().id())))
         else:
             error = "Please enter a subject and some content."
             self.tpl_data.update({
@@ -287,7 +287,7 @@ class PostLikeHandler(BaseHandler):
             post.put()
             
         # Send the user back to the post.
-        self.redirect('/post/%s' % post_id)
+        self.redirect('/post/{}'.format(post_id))
     
 class PostDeleteHandler(BaseHandler):
     '''The request handler for deleting a post'''
@@ -298,7 +298,7 @@ class PostDeleteHandler(BaseHandler):
         # If the current user is not the author of the post, redirect to the
         # post view page.
         if not(post.user.username == self.current_user.username):
-            self.redirect('/post/%s' % post_id)
+            self.redirect('/post/{}'.format(post_id))
         else:
             # First we need to delete all the comments related to this post.
             db.delete(post.comments)
@@ -325,7 +325,7 @@ class CommentCreateHandler(BaseHandler):
             
             # If the user is not the author do not let them edit comment.
             if not(comment.user.username == self.current_user.username):
-                self.redirect('/comment/%s' % comment_id)
+                self.redirect('/comment/{}'.format(comment_id))
             # Otherwise pass the data along to the template
             else:
                 self.tpl_data.update({
@@ -349,7 +349,7 @@ class CommentCreateHandler(BaseHandler):
                 comment.subject = subject
                 comment.content = content
                 comment.put()
-                self.redirect('/comment/%s' % str(comment.key().id()))
+                self.redirect('/comment/{}'.format(str(comment.key().id())))
                 
             # If this is a new comment, we create the comment then append it
             # to the comment list on the related post.
@@ -363,7 +363,7 @@ class CommentCreateHandler(BaseHandler):
                 # post.comments is a list, append our new comment key to it.
                 post.comments.append(comment.key())
                 post.put()
-                self.redirect('/post/%s' % str(post.key().id()))
+                self.redirect('/post/{}'.format(str(post.key().id())))
         else:
             error = "Please enter a subject and some content."
             self.tpl_data.update({
@@ -396,7 +396,7 @@ class CommentDeleteHandler(BaseHandler):
         if not(comment.user.username == self.current_user.username):
             
             # Redirect the user back to the related comment.
-            self.redirect('/comment/%s' % comment_id)
+            self.redirect('/comment/{}'.format(comment_id))
         else:
             
             # Get the post that this comment is attached to and remove the
@@ -416,7 +416,7 @@ class CommentDeleteHandler(BaseHandler):
             time.sleep(0.1)
             
             # Redirect the user back to the related post.
-            self.redirect('/post/%s' % post_id)
+            self.redirect('/post/{}'.format(post_id))
             
 app = webapp2.WSGIApplication([
     ('/', FrontHandler),

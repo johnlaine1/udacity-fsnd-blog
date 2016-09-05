@@ -4,10 +4,7 @@ import webapp2
 import hmac
 import validate
 import time
-from post import Post
-from user import User
-from comment import Comment
-import user
+from entities import *
 from google.appengine.ext import db
 
 SECRET ='ilovemyfamily'

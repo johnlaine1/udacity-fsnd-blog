@@ -1,7 +1,15 @@
 from google.appengine.ext import db
 
 class User(db.Model):
-    '''A class to create a User database'''
+    '''A class used to create a User entity type for the appengine datastore.
+    
+    Attributes
+        username: (string) A unique username.
+        password: (string) A hashed password.
+        email: (string) A unique password.
+        created: (timestamp) The date the user was created.
+    '''
+    
     username = db.StringProperty(required = True)
     password = db.StringProperty(required = True)
     email = db.StringProperty()

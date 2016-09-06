@@ -2,7 +2,7 @@ from google.appengine.ext import db
 from user import User
 
 class Comment(db.Model):
-    '''A class used to create a Comment entity type for the appengine datastore.
+    '''A class used to manipulate a Comment entity in the appengine datastore.
     
     The comment entity is attached to the post comment by adding it's entity
     key to the related post attribute 'comments'

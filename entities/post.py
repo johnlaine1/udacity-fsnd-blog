@@ -3,7 +3,7 @@ from user import User
 from comment import Comment
 
 class Post(db.Model):
-    '''A class used to create a Post entity type for the appengine datastore.
+    '''A class used to manipulate a Post entity in the appengine datastore.
     
     Attribues
         subject: (string) The subject or title of the post.

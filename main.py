@@ -16,8 +16,11 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 
 
 class BaseHandler(webapp2.RequestHandler):
-    '''This class creates some generic functions and properties for use in 
-    other handlers. Add all template data to the 'data' dictionary to make it 
+    '''A basehandler for all other handlers
+    
+    This class creates generic methods and properties for use in 
+    other handlers. 
+    Add all template data to the 'data' dictionary to make it 
     available to templates.
     
     Attributes
@@ -43,11 +46,17 @@ class BaseHandler(webapp2.RequestHandler):
         self.restricted_path_redirect(request)
         
     def restricted_path_redirect(self, request):
-        '''If the user is not logged in and tries to access forbidden pages,
+        '''Restrict certain paths based on whether the user is logged in or not.
+  
+        If the user is not logged in and tries to access forbidden pages,
         redirect to login page.
         If the user is logged in and tries to access forbidden pages,
         redirect to front page.
+        
+        Args:
+            The http request object.
         '''
+        
         restricted_non_user_paths = [
             '/post/create', 
             '/post/update', 
@@ -71,11 +80,28 @@ class BaseHandler(webapp2.RequestHandler):
                     self.redirect('/')
     
     def get_user(self, username):
+        '''Get a user from the database
+        
+        Args:
+            username: (string) A username
+            
+        Returns:
+            A User object
+        '''
+        
         q = db.Query(User)
         q.filter("username =", username)
         return q.get()
         
     def get_cookie(self, name):
+        '''Get a cookie value from an http request object.
+        
+        Args:
+            name: (string) The name of the cookie.
+            
+        Returns:
+            The string value of the cookie if it exists, otherwise 'None'.
+        '''
         username = self.request.cookies.get(name)
         if (username):
             return self.check_secure_val(username)
@@ -83,18 +109,60 @@ class BaseHandler(webapp2.RequestHandler):
             return None
         
     def set_cookie(self, name, value):
+        '''Set a cookie value on an http response object
+        
+        Args:
+            name: (string) The name of the cookie to set.
+            value: (string) The value of the cookie being set.
+        '''
+        
         cookie = self.make_secure_val(value)
         self.response.headers.add_header(
             'Set-Cookie', 
             '{}={}; Path=/'.format(name, str(cookie)))
     
     def hash_str(self, s):
+        '''Create a hash representing a string
+        
+        Args:
+            s: (string) The string to be hashed.
+            
+        Returns:
+            A hashed representation of the string passed in.
+        '''
+        
         return hmac.new(SECRET, s).hexdigest()
         
     def make_secure_val(self, s):
+        '''Returns a secure version of a string.
+        
+        A string is passed in and a string in the fromat [string]|[hash] is 
+        returned. Where [string] is the original string that was passed in and
+        [hash] is a hashed version of the string that was passed in.
+        
+        Args:
+            s: (string) The string to be made secure.
+            
+        Returns:
+            A string in the format [string]|[hash]
+        '''
+        
         return '{}|{}'.format(s, self.hash_str(s))
     
     def check_secure_val(self, h):
+        '''Check that a value in the format [string]|[hash] is valid.
+        
+        Verify that a value in the format [string]|[hash] is valid, where
+        [string] is a string and [hash] is a hash of that string created
+        with the make_secure_val method.
+        
+        Args:
+            h: (string) A string in the format [string]|[hash]
+            
+        Returns:
+            The [string] of [string]|[hash] if verified, None otherwise.
+        '''
+        
         val = h.split('|')[0]
         
         if h == self.make_secure_val(val):
@@ -103,6 +171,17 @@ class BaseHandler(webapp2.RequestHandler):
             return None
 
     def render(self, template, **kwargs):
+        '''A wrapper for the response.out.write method to work with templates
+        
+        All templates use the self.tpl_data dictionary for string interpolation.
+        If you wish to make a variable available to the template, simply add it
+        to the self.tpl_data dictionary.
+        
+        Args:
+            template: (string) The name of the file containing the template to
+                      be used.
+        '''
+        
         t = jinja_env.get_template(template)
         self.response.out.write(t.render(data = self.tpl_data))
         

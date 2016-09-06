@@ -1,7 +1,7 @@
 from google.appengine.ext import db
 
 class User(db.Model):
-    '''A class used to create a User entity type for the appengine datastore.
+    '''A class used to manipulate a User entity in the appengine datastore.
     
     Attributes
         username: (string) A unique username.

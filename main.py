@@ -125,8 +125,8 @@ class RegistrationHandler(BaseHandler):
         email = self.request.get("email")
         cookie = self.request.cookies.get('username')
         
-        user_input = Validator(username, password, verify, email)
-        errors = user_input.errors()
+        validated_input = Validator(username, password, verify, email)
+        errors = validated_input.errors
         
         user_exists = self.get_user(username)
         if not errors:

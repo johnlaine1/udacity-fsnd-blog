@@ -1,21 +1,32 @@
-'''A helper Class related to user input validation.'''
-
 import re
 
 
 class Validator(object):
+    '''A class to validate user input for registration.
+    
+    Attributes:
+        username:
+            The username that was passed into the class.
+        password:
+            The password that was passed into the class.
+        verify:
+            The verify that was passed into the class.
+        email:
+            The email that was passed into the class.
+        errors: 
+            A dict containing error messages related to the user
+            input. If there are no errors, an empty dict is returned.
+    '''
     
     def __init__(self, username, password, verify, email):
         self.username = username
         self.password = password
         self.verify = verify
         self.email = email
+        self.errors = self.get_errors()
         
     def check_username(self):
         '''Check if a username passes a regex.
-        
-        Args:
-            username: (string) The username to check.
             
         Returns:
             True if the username matches the regex and false otherwise.
@@ -28,9 +39,6 @@ class Validator(object):
     def check_password(self):
         '''Check if a password passes a regex.
         
-        Args:
-            password: (string) The password to check.
-            
         Returns:
             True if the password matches the regex and false otherwise.
         '''
@@ -56,26 +64,19 @@ class Validator(object):
             
     def check_email(self):
         '''Check if an email passes a regex.
-        
-        Args:
-            email: (string) The email to check.
             
         Returns:
             True if the email matches the regex and false otherwise.
         '''
+        
         EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
         
         return EMAIL_RE.match(self.email)
         
-    def errors(self):
+    def get_errors(self):
         '''Validate user input collected during registraion.
         
-        Args:
-            username: (string) A username.
-            password: (string) A password.
-            verify: (string) A string that should match the password.
-            email: (string) An email address.
-        
+
         Returns:
             A dictionary mapping 'error type' to 'error message'. An empty dict is
             returned if there are no errors.

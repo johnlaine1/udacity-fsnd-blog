@@ -15,6 +15,7 @@ This project was created and submitted to Udacity as part of the Full Stack Deve
 3. cd into the project `cd udacity-fsnd-blog`
 4. Depending on your system setup, you may be able to just run `dev_appserver.py app.yaml` from the root directory of the project (where the app.yaml file is located) and view the app at http://localhost:8080/ <br>
 If this does not work for you, I am sorry and please find more information about `dev_appserver.py` [here](https://cloud.google.com/appengine/docs/python/tools/using-local-server)
+
 ## Using the Application
 1. All posts can be viewed on the front page by both logged in or anonymous users.
 2. Click 'Login or Register' to login or create a new account.

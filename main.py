@@ -2,7 +2,7 @@ import os
 import jinja2
 import webapp2
 import hmac
-import validate
+from validator import Validator
 import time
 from entities import *
 from google.appengine.ext import db
@@ -125,7 +125,8 @@ class RegistrationHandler(BaseHandler):
         email = self.request.get("email")
         cookie = self.request.cookies.get('username')
         
-        errors = validate.user_validate(username, password, verify, email)
+        user_input = Validator(username, password, verify, email)
+        errors = user_input.errors()
         
         user_exists = self.get_user(username)
         if not errors:

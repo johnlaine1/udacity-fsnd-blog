@@ -17,8 +17,10 @@ class Validator(object):
             A dict containing error messages related to the user
             input. If there are no errors, an empty dict is returned.
     '''
-    
+        
     def __init__(self, username, password, verify, email):
+        '''Initialize Validator class with user supplied data'''
+        
         self.username = username
         self.password = password
         self.verify = verify
@@ -33,7 +35,6 @@ class Validator(object):
         '''
         
         USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-    
         return USER_RE.match(self.username)
     
     def check_password(self):

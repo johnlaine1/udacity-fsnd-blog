@@ -26,13 +26,15 @@ class BaseHandler(webapp2.RequestHandler):
     '''
     
     def __init__(self, request, response):
+        
         # This is how we call the base class constructor, see this link:
         # http://stackoverflow.com/questions/15398179/in-python-webapp2-how-put-a-init-in-a-handler-for-get-and-post
         self.initialize(request, response)
+        
         self.tpl_data = {}
         self.current_user = None
         
-        # If the user is logged in get thier username, otherwise store None
+        # If the user is logged in get thier username, otherwise store None.
         username = self.get_cookie('username')
         if (username):
             self.current_user = self.get_user(username)

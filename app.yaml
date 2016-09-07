@@ -12,6 +12,9 @@ handlers:
 - url: /js
   static_dir: js
   
+- url: /vendor
+  static_dir: vendor
+  
 - url: /.*
   script: main.app
 

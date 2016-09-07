@@ -2,26 +2,39 @@
 
 {% block content %}
 
-<h2 class="jumbotron">This is the page to Create a Comment</h2>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <h1 class="text-center">
+                {% if data.comment %}
+                    Edit This Comment
+                {% else %}
+                    Create a New Comment
+                {% endif %}
+            </h1>
+            <form method="post">
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" name="subject" id="subject" class="form-control" 
+                           value="{% if data.comment %} {{ data.comment.subject }} {% endif %}">
+                </div>
+                <div class="form-group">
+                    <label for="content">Content</label>
+                    <textarea id="content" name="content" class="form-control">{%if data.comment %} {{ data.comment.content }} {% endif %}</textarea>
+                </div>
+                <div class="form-group">
+                    {% if data.update_comment %}
+                    <input class="btn btn-success" type="submit" value="Update comment">
+                    <a class="btn btn-warning" href="/comment/{{ data.comment.key().id()}}">Cancel</a>
+                    {% else %}
+                    <input type="submit" value="Create New comment">
+                    {% endif %}
+                </div>
+            </form>
+            <div class="error bg-danger">{% if data.error %} {{ data.error }} {% endif %}</div>
+        </div>
+    </div>
+</div>
 
-<form method="post">
-    <div class="form-group">
-        <label for="subject">Subject</label>
-        <input type="text" name="subject" id="subject" class="form-control" 
-               value="{% if data.comment %} {{ data.comment.subject }} {% endif %}">
-    </div>
-    <div class="form-group">
-        <label for="content">Content</label>
-        <textarea id="content" name="content" class="form-control">{%if data.comment %} {{ data.comment.content }} {% endif %}</textarea>
-    </div>
-    <div class="form-group">
-        {% if data.update_comment %}
-        <input class="btn btn-success" type="submit" value="Update comment">
-        <a class="btn btn-warning" href="/comment/{{ data.comment.key().id()}}">Cancel</a>
-        {% else %}
-        <input type="submit" value="Create New comment">
-        {% endif %}
-    </div>
-</form>
-<div class="error bg-danger">{% if data.error %} {{ data.error }} {% endif %}</div>
+
 {% endblock %}

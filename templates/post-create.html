@@ -1,27 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <h1 class="text-center">
+                {% if data.post %}
+                    Edit This Post
+                {% else %}
+                    Create a New Post
+                {% endif %}
+            </h1>
+            <form method="post">
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" name="subject" id="subject" class="form-control" 
+                           value="{% if data.post %} {{ data.post.subject }} {% endif %}">
+                </div>
+                <div class="form-group">
+                    <label for="content">Content</label>
+                    <textarea id="content" name="content" class="form-control">{%if data.post %} {{ data.post.content }} {% endif %}</textarea>
+                </div>
+                <div class="form-group">
+                    {% if data.update_post %}
+                    <input class="btn btn-success" type="submit" value="Update Post">
+                    <a class="btn btn-warning" href="/post/{{ data.post.key().id()}}">Cancel</a>
+                    {% else %}
+                    <input type="submit" value="Create New Post">
+                    {% endif %}
+                </div>
+            </form>
+            <div class="error bg-danger">{% if data.error %} {{ data.error }} {% endif %}</div> 
+        </div>
+    </div>
+</div>
 
-<h2 class="jumbotron">This is the page to CREATE a post</h2>
-
-<form method="post">
-    <div class="form-group">
-        <label for="subject">Subject</label>
-        <input type="text" name="subject" id="subject" class="form-control" 
-               value="{% if data.post %} {{ data.post.subject }} {% endif %}">
-    </div>
-    <div class="form-group">
-        <label for="content">Content</label>
-        <textarea id="content" name="content" class="form-control">{%if data.post %} {{ data.post.content }} {% endif %}</textarea>
-    </div>
-    <div class="form-group">
-        {% if data.update_post %}
-        <input class="btn btn-success" type="submit" value="Update Post">
-        <a class="btn btn-warning" href="/post/{{ data.post.key().id()}}">Cancel</a>
-        {% else %}
-        <input type="submit" value="Create New Post">
-        {% endif %}
-    </div>
-</form>
-<div class="error bg-danger">{% if data.error %} {{ data.error }} {% endif %}</div>
 {% endblock %}

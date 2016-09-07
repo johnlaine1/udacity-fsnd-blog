@@ -2,27 +2,33 @@
 
 {% block content %}
 
-<div class="jumbotron text-center">
-    <h1>Login</h1>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <h1 class="text-center">
+                Login
+            </h1>
+            <div class="create-account">
+                <h3>Don't have an account? <a href="/signup">Create one</a></h3>
+            </div>
+            <form method="post" class="form-vertical">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" name="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password">
+                </div>
+                {% if data.error %}
+                <span class="bg-danger">{{ data.error }}</span>
+                {% endif %}
+                <div class="form-group">
+                    <input type="submit">       
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-<div class="create-account">
-    <h3>Don't have an account? <a href="/signup">Create one</a></h3>
-</div>
-<form method="post" class="form-vertical">
-    <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" class="form-control" id="username" name="username">
-    </div>
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" class="form-control" id="password" name="password">
-    </div>
-    {% if data.error %}
-    <span class="bg-danger">{{ data.error }}</span>
-    {% endif %}
-    <div class="form-group">
-        <input type="submit">       
-    </div>
-</form>
 
 {% endblock %}

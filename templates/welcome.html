@@ -2,20 +2,29 @@
 
 {% block content %}
 
-<div class="jumbotron text-center">
-    <h1>Welcome, {{ data.user.username | capitalize }} !</h1>
-</div>
-
-{% if data.posts %}
-    <div class="list-group">
-    {% for post in data.posts %}
-        <a href="post/{{ post.key().id() }}" class="list-group-item">
-            <h4 class="list-group-item-heading">{{ post.subject }}</h4>
-            <p class="list-group-item-text post-time"><strong>Created on: </strong>{{ post.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
-            <p class="list-group-item-text post-body">{{ post.content }}</p>
-        </a>
-    {% endfor %}
+    <div class="container">
+        <h1 class="text-center well">Welcome, {{ data.user.username | capitalize }} !</h1>
+        <!-- Loop through the posts -->
+        {% if data.posts %}
+            {% for post in data.posts %}
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-preview">
+                    <a href="post/{{ post.key().id() }}">
+                        <h2 class="post-title">
+                            {{ post.subject }}
+                        </h2>
+                        <h3 class="post-subtitle">
+                            {{ post.content }}
+                        </h3>
+                    </a>
+                    <p class="post-meta">Posted by <strong>{{post.user.username}}</strong> on {{post.created.strftime("%b %d, %Y at %-I:%M %p")}}</p>
+                </div>
+                <hr>
+            </div>
+        </div>
+            {% endfor %}
+        {% endif %}
     </div>
-{% endif %}
 
 {% endblock %}

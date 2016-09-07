@@ -2,22 +2,25 @@
 
 {% block content %}
 
-<div class="jumbotron text-center">
-   <h2>{{ data.comment.subject }}</h2>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <h1 class="text-center">{{ data.comment.subject }}</h1>
+            <div class="comment-created">
+                <p><strong>Created on: </strong>{{ data.comment.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
+                <p><strong>Created by: </strong>{{ data.comment.user.username }}</p>
+            </div>
+            <div class="comment-content well">
+                {{ data.comment.content }}
+            </div>
+            {% if data.user %}
+                {% if data.user.username == data.comment.user.username %}
+                <a href="/comment/delete/{{ data.comment.key().id() }}" class="delete-button btn btn-danger">Delete Comment</a>
+                <a href="/post/{{ data.comment.post_id }}/comment/update/{{ data.comment.key().id() }}" class="update-button btn btn-primary">Update Comment</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
 </div>
-
-<div class="comment-created">
-    <p><strong>Created on: </strong>{{ data.comment.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
-    <p><strong>Created by: </strong>{{ data.comment.user.username }}</p>
-</div>
-<div class="comment-content well well-lg">
-    {{ data.comment.content }}
-</div>
-{% if data.user %}
-    {% if data.user.username == data.comment.user.username %}
-    <a href="/comment/delete/{{ data.comment.key().id() }}" class="delete-button btn btn-danger">Delete Comment</a>
-    <a href="/post/{{ data.comment.post_id }}/comment/update/{{ data.comment.key().id() }}" class="update-button btn btn-primary">Update Comment</a>
-    {% endif %}
-{% endif %}
 
 {% endblock %}

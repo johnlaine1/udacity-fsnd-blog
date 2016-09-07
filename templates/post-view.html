@@ -48,28 +48,27 @@
     
     <!-- Related Comments -->
     <div class="row">
-        <div class="comments">
-            <h2 class="text-center">Comments</h2>
-            {% if data.comments %}
-                {% for comment in data.comments %}
-                    <div class="row">
-                        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                            <a href="/comment/{{ comment.key().id() }}" class="list-group-item">
-                                <p><strong>Created on: </strong>{{ comment.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
-                                <p><strong>Created by: </strong>{{ comment.user.username }}</p>
-                                <p><strong>Title: </strong>{{ comment.subject }}</p>
-                                <p><strong>Content: </strong>{{ comment.content }}</p>  
-                                <p><strong>Post id: </strong>{{ comment.post_id }}</p>
-                            </a>
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="comments">
+                <h2 class="text-center">Comments</h2>
+                {% if data.comments %}
+                    {% for comment in data.comments %}
+                        <div class="row">
+                                <a href="/comment/{{ comment.key().id() }}" class="list-group-item">
+                                    <p><strong>Created on: </strong>{{ comment.created.strftime("%b %d, %Y --- %-I:%M %p") }}</p>
+                                    <p><strong>Created by: </strong>{{ comment.user.username }}</p>
+                                    <p><strong>Title: </strong>{{ comment.subject }}</p>
+                                    <p><strong>Content: </strong>{{ comment.content }}</p> 
+                                </a>
                         </div>
+                    {% endfor %}
                     </div>
-                {% endfor %}
-                </div>
-            {% else %}
-                <h3>There are no comments yet, be the first to add a <a href="/post/{{ data.post.key().id() }}/comment/create">comment!</a></h3>
-            {% endif %}
+                {% else %}
+                    <h3>There are no comments yet, be the first to add a <a href="/post/{{ data.post.key().id() }}/comment/create">comment!</a></h3>
+                {% endif %}
+            </div>
         </div>
-        
+    
 </div>
 
 {% endblock %}

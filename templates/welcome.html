@@ -3,7 +3,7 @@
 {% block content %}
 
     <div class="container">
-        <h1 class="text-center well">Welcome, {{ data.user.username | capitalize }} !</h1>
+        <h1 class="text-center well well-sm">Welcome, {{ data.user.username | capitalize }} !</h1>
         <!-- Loop through the posts -->
         {% if data.posts %}
             {% for post in data.posts %}
@@ -15,7 +15,7 @@
                             {{ post.subject }}
                         </h2>
                         <h3 class="post-subtitle">
-                            {{ post.content }}
+                            {{ post.content|truncate(150) }}
                         </h3>
                     </a>
                     <p class="post-meta">Posted by <strong>{{post.user.username}}</strong> on {{post.created.strftime("%b %d, %Y at %-I:%M %p")}}</p>

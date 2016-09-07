@@ -254,7 +254,7 @@ class LoginHandler(BaseHandler):
         if user and username and password:
             if self.hash_str(password) == user.password:
                 self.set_cookie('username', username)
-                self.redirect(self.request.referer)
+                self.redirect('/welcome')
 
         self.tpl_data['error'] = "Invalid Login"
         self.render('login.html')

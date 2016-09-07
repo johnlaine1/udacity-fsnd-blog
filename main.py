@@ -212,17 +212,23 @@ class RegistrationHandler(BaseHandler):
         user_exists = self.get_user(username)
         if not errors:
             if not user_exists:
+                
                 # Hash the password
                 password = self.hash_str(password)
+                
                 # Create the user
                 user = User(username = username, password = password)
                 user.put()
+                
                 # Add the user to the global data property
                 self.tpl_data['user'] = user
+                
                 # Hash the cookie
                 cookie = self.make_secure_val(username)
+                
                 # Set the cookie
                 self.response.headers.add_header('Set-Cookie', 'username={}; Path=/'.format(str(cookie)))
+                
                 # Send the user to the welcome screen
                 self.redirect('/welcome')
             else:
@@ -238,7 +244,8 @@ class WelcomeHandler(BaseHandler):
     def get(self):
             posts = db.Query(Post).order('-created')
             self.tpl_data['posts'] = posts
-            self.render('welcome.html')
+            self.tpl_data['welcome'] = True
+            self.render('front.html')
 
 class LoginHandler(BaseHandler):
     '''The request handler for the login page'''

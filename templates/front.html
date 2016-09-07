@@ -2,6 +2,9 @@
 
 {% block content %}
     <div class="container">
+        {% if data.welcome %}
+            <h1 class="text-center well well-sm">Welcome, {{ data.user.username | capitalize }} !</h1>
+        {% endif %}
         <!-- Loop through the posts -->
         {% if data.posts %}
             {% for post in data.posts %}
@@ -16,7 +19,11 @@
                             {{ post.content|truncate(150)}}
                         </h3>
                     </a>
+                    <div class="likes label label-primary">
+                        Likes <span class="badge">{{ post.likes|length }}</span>
+                    </div>
                     <p class="post-meta">Posted by <strong>{{post.user.username|capitalize}}</strong> on {{post.created.strftime("%b %d, %Y at %-I:%M %p")}}</p>
+
                 </div>
                 <hr>
             </div>

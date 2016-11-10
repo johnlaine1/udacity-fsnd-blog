@@ -1,8 +1,7 @@
 # A Multi User Blog
 
+### [Live Demo](https://udacity-muli-user-blog.appspot.com/)
 #### Created by: John Laine
-
-## [Demo](https://udacity-muli-user-blog.appspot.com/)
 
 ## Description
 A multi user blog written in Python that utilizes the App Engine platform by Google.
